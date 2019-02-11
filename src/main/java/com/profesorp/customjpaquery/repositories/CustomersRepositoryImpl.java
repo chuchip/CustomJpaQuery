@@ -17,12 +17,12 @@ import javax.persistence.criteria.Predicate;
 import javax.persistence.criteria.Root;
 
 import com.profesorp.customjpaquery.entities.CustomersEntity;
-public class CustomersRepositoryImpl implements ICustomFind{
+public class CustomersRepositoryImpl{
 
 	@PersistenceContext
 	private EntityManager entityManager;
 	
-	@Override
+	
 	public List<CustomersEntity> getData(HashMap<String, Object> conditions)
 	{
 		CriteriaBuilder cb = entityManager.getCriteriaBuilder();
@@ -35,7 +35,7 @@ public class CustomersRepositoryImpl implements ICustomFind{
 			switch (field)
 			{
 				case "id":
-					predicates.add(cb.equal (root.get(field), (Integer)value));
+					predicates.add(cb.equal(root.get(field), (Integer)value));
 					break;
 				case "name":
 					predicates.add(cb.like(root.get(field),"%"+(String)value+"%"));
@@ -43,7 +43,7 @@ public class CustomersRepositoryImpl implements ICustomFind{
 				case "address":
 					predicates.add(cb.like(root.get(field),"%"+(String)value+"%"));
 					break;
-				case "created_date":
+				case "created":
 					String dateCondition=(String) conditions.get("dateCondition");					
 					switch (dateCondition)
 					{

@@ -27,7 +27,7 @@ public class CustomersEntity {
 	@Column
 	String email;
 		
-	@Column 
+	@Column(name="created_date")
 	@Temporal(TemporalType.DATE)
-	Date created_date;
+	Date created;
 }

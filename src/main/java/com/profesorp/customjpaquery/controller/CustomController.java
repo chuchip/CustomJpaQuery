@@ -42,7 +42,7 @@ public class CustomController {
 			dateCondition=GREATER_THAN;	
 		if (createdDate!=null)
 		{
-			data.put("created_date",createdDate);
+			data.put("created",createdDate);
 			data.put("dateCondition",dateCondition);
 		}
 		
