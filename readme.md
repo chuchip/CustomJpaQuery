@@ -1,8 +1,6 @@
-Hay veces en que las condiciones de una consulta pueden variar en tiempo de ejecución. Es un caso muy común cuando, por ejemplo, el usuario puede restringir la consulta sobre diferentes campos pero no siendo obligatorio meter condiciones en  todos los campos.
+Hay veces en que las campos sobre los que restringir una consulta pueden variar en tiempo de ejecución. En ese caso si queremos usar JPA no podemos usar una sentencia **@Query** definida en nuestro repositorio pues no sabemos los campos sobre los que se aplicaran condiciones en la consulta. Además es bastante común que el usuario pueda elegir  el criterio de búsqueda sobre un campo, deseando que el valor de un campo deba ser igual, mayor o menor, respecto al valor introducido .
 
-En ese caso si queremos usar JPA no podemos usar una sentencia **@Query** definida en nuestro repositorio pues no sabemos los campos sobre los que se va a establecer la consulta. Además es bastante común que el usuario pueda elegir  el criterio de búsqueda sobre un campo. Es decir si quiere que un campos sea igual, mayor o menor que un valor dado.
-
-En **Spring Boot** podemos dar una  solución a este problema usando un **CriteriaBuilder** de nuestro **EntityManager** . En esta entrada os mostrare como hacerlo fácilmente.
+En **Spring Boot** podemos dar una  solución a este problema usando un la clase **CriteriaBuilder** de nuestro **EntityManager** . En esta entrada os mostrare como hacerlo fácilmente.
 
 Para ello he creado un proyecto que he dejado en https://github.com/chuchip/CustomJpaQuery  
 
@@ -110,21 +108,13 @@ Ahora creamos una lista de objeto **Predicate** . En esa lista irán todos los *
 
 Utilizando Lambdas y Streams para hacer el código mas limpio y sencillo, vamos recorriendo el **HashMap** y añadiendo a la lista de **Predicates**  las condiciones definidas.
 
-Partiendo del objeto   **CriteriaQuery**  se irán llamando a la función deseada según el criterio a aplicar. De esta manera, si queremos establecer como condición que un campo sea igual a un valor llamaremos a la función **equal**,  pasando como primer parámetro la **Expresion** que hace referencia al campo de la entidad, y después el valor deseado. El objeto  **Expresion** se creara simplemente cogiendo del objeto **Root** anteriormente definido el campo deseado.
+Partiendo del objeto   **CriteriaQuery**  se ira llamando a la función deseada según el criterio a aplicar. De esta manera, si queremos establecer como condición que un campo sea igual a un valor llamaremos a la función **equal**(),  pasando como primer parámetro la **Expresion** que hace referencia al campo de la entidad, y después el valor deseado. El objeto  **Expresion** se creara simplemente cogiendo del objeto **Root** anteriormente definido, el nombre de la columna sobre el que se establecerá la condición.
 
-Si el campo es de tipo **Date**, es necesario especificar el tipo de dato del campo como se muestra en el código siguiente, pues de otra manera no sabrá parsear correctamente la fecha.
+Si deseamos añadir una condición donde un campo sea *como* a un texto introducido se llamara a la función **like**(). En caso de que deseemos que el campo tenga un valor superior al introducido se usara	**greaterThan**() y así sucesivamente.
 
-```
-root.<Date>get(field)
-```
+Si el campo es de tipo **Date**, es necesario especificar el tipo de dato del campo como se muestra en el código `root.<Date>get(field)`, pues de otra manera no sabrá parsear correctamente la fecha.
 
-
-
-referencia nuestra** lista de **Predicates**  
-
-Una vez tenemos las condiciones establecidas
-
-Resaltar que el nombre del campo es el definido en nuestra entity que lógicamente no tiene porque ser el de la columna en la base de datos. El campo de fecha en la entity esta creada con las siguientes sentencias:
+Resaltar que el nombre del campo es el definido en nuestra entity que lógicamente no tiene porque ser el de la columna en la base de datos. Por ejemplo, el campo de fecha en la entity del proyecto de ejemplo, esta creada con las siguientes sentencias:
 
 ```
 @Column(name="created_date")
@@ -132,4 +122,10 @@ Resaltar que el nombre del campo es el definido en nuestra entity que lógicamen
 Date created;
 ```
 
-De tal manera que en la base de datos la columna se llamara `created_date` pero todas las referencias a la entidad se haran a traves del nombre `created` y es por ello que cuando busquemos el nombre del campo deberemos en **Root** deberemos buscar el campo `created`
+De tal manera que en la base de datos la columna se llamara `created_date` pero todas las referencias a la entidad se harán a través del nombre `created` y es por ello que cuando busquemos el nombre del campo deberemos en **Root** deberemos buscar el campo `created` y no el campo `created_date`que no lo encontraría y nos daría error.
+
+Una vez tenemos las condiciones de la consulta establecidas no tenemos más que preparar la consulta llamando a la función **select** a la que primero le indicaremos el **Root** con la entidad a consultar y después, las condiciones establecidas en el ArrayList de **Predicate**, el cual deberemos  convertir previamente a un simple Array. Esto lo haremos con la sentencia: '`query.select(root).where(predicates.toArray(new Predicate[predicates.size()]));`
+
+Ahora ejecutaremos la select y recogeremos los resultados en un objeto **List** con el comando `entityManager.createQuery(query).getResultList()`
+
+Como siempre no dudéis en hacer cualquier consulta  o mandar feedbacks. ¡¡ Hasta otra!!
